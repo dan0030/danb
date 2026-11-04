@@ -9,5 +9,6 @@ import './styles/widgets.css'
 import './styles/content.css'
 import './styles/pair.css'
 import './styles/rp.css'
+import './styles/hwatu.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App />)

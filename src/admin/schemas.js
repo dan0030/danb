@@ -174,6 +174,7 @@ export const DESIGN_SECTIONS = [
         label: '카드 스타일',
         type: 'select',
         options: [
+          { value: 'hanafuda', label: '화투패 (이중 테두리 + 금빛 안선)' },
           { value: 'flat', label: 'One UI 기본 (평면)' },
           { value: 'shadow', label: '그림자' },
           { value: 'outline', label: '테두리' },
@@ -318,6 +319,12 @@ export const DESIGN_SECTIONS = [
       { key: 'allowToggle', label: '방문자가 라이트/다크 바꿀 수 있게', type: 'toggle' },
       { key: 'animations', label: '애니메이션', type: 'toggle' },
       { key: 'hoverLift', label: '마우스를 올리면 살짝 떠오르기', type: 'toggle' },
+      { type: 'heading', label: '화투 장식', help: '애니메이션을 끄거나 기기에서 \'동작 줄이기\'를 켜면 움직이는 장식은 나오지 않아요.' },
+      { key: 'hwDecor', label: '배경 장식 (붉은 해 · 물결 · 페이지 한자 · 세로 글씨)', type: 'toggle' },
+      { key: 'hwPetals', label: '흩날리는 꽃잎', type: 'toggle', show: (t) => t.hwDecor !== false },
+      { key: 'hwWipe', label: '페이지 넘김 막 (붉은 막이 사선으로 스쳐가요)', type: 'toggle' },
+      { key: 'hwCursor', label: '먹 번짐 커서 고리 (마우스 기본 커서일 때만)', type: 'toggle' },
+      { key: 'hwDuotone', label: '목록 사진 붉은 판화 효과 (마우스를 올리면 원래 색)', type: 'toggle' },
     ],
   },
   {

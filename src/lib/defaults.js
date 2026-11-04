@@ -2,15 +2,15 @@
 // 관리자 화면에서 저장한 값이 있으면 그 값이 이 기본값 위에 덮어씌워져요.
 
 export const DEFAULT_SITE = {
-  title: '우리의 기록',
+  title: '花札 — 우리의 기록',
   description: '드림 페어 아카이브',
-  favicon: '💌',
+  favicon: '🎴',
   pair: {
     pairName: '최애 × 나',
     bio: '둘만의 이야기를 차곡차곡 모아두는 곳',
-    me: { name: '나', sub: '@me', image: '', color: '#ff8fab' },
-    partner: { name: '최애', sub: '@partner', image: '', color: '#6c9cff' },
-    symbol: 'fa-solid fa-heart',
+    me: { name: '나', sub: '@me', image: '', color: '#d8342a' },
+    partner: { name: '최애', sub: '@partner', image: '', color: '#c9a45c' },
+    symbol: 'fa-solid fa-sun',
     startDate: '',
     startLabel: '함께한 지',
   },
@@ -36,7 +36,7 @@ export const DEFAULT_SITE = {
   features: { comments: true, guestbook: true, reactions: true, showViews: false, nameSwap: true },
   reactions: ['❤️', '🥹', '😭', '✨', '👏'],
   postsPerPage: 12,
-  footer: 'ODAN DREAMPAIR',
+  footer: 'HANAFUDA ARCHIVE',
   events: [], // 캘린더 일정 { id, date, endDate, time, label, note, color, annual }
   guestbookIntro: '다녀간 흔적을 남겨주세요.',
 }
@@ -48,6 +48,10 @@ export const DEFAULT_SITE = {
 // family: CSS font-family 이름, google: Google Fonts css2 의 family 파라미터
 export const FONTS = [
   { key: 'pretendard', label: 'Pretendard (기본)', family: "'Pretendard Variable', Pretendard" },
+  // 화투 디자인용: 일본어 명조(라틴·한자)에 한글은 본명조가 이어 받아요.
+  { key: 'hw-mincho', label: '花 시포리 명조 + 본명조 (화투 제목)', family: "'Shippori Mincho B1', 'Noto Serif KR'", google: 'Shippori+Mincho+B1:wght@500;700;800&family=Noto+Serif+KR:wght@500;700;900' },
+  { key: 'zen-old', label: '花 젠 올드 명조 + 본명조', family: "'Zen Old Mincho', 'Noto Serif KR'", google: 'Zen+Old+Mincho:wght@500;700;900&family=Noto+Serif+KR:wght@500;700;900' },
+  { key: 'zen-antique', label: '花 젠 앤티크 + 송명', family: "'Zen Antique', 'Song Myung'", google: 'Zen+Antique&family=Song+Myung' },
   { key: 'system', label: '시스템 글꼴', family: 'system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic"' },
   { key: 'noto-sans', label: '본고딕 (Noto Sans KR)', family: "'Noto Sans KR'", google: 'Noto+Sans+KR:wght@300;400;500;700;900' },
   { key: 'ibm-plex', label: 'IBM Plex Sans KR', family: "'IBM Plex Sans KR'", google: 'IBM+Plex+Sans+KR:wght@300;400;500;700' },
@@ -114,12 +118,43 @@ const ONEUI_DARK = {
   memoText: '#f6f2d8',
 }
 
+// 화투(花札) 기본 색: 밤은 먹빛 위 주홍, 낮은 화지(和紙) 위 주홍
+const HW_LIGHT = {
+  accent: '#c8281e',
+  accentText: '#fff8ec',
+  bg: '#efe6d4',
+  bg2: '#e2d2b4',
+  surface: '#faf5ea',
+  surface2: '#f0e6d3',
+  text: '#1c1613',
+  textSub: '#6f6152',
+  line: '#dccdb1',
+  drawer: '#efe6d4',
+  memo: '#f6e7c4',
+  memoText: '#2b2016',
+}
+
+const HW_DARK = {
+  accent: '#e0402f',
+  accentText: '#fff8ec',
+  bg: '#14100e',
+  bg2: '#2a1712',
+  surface: '#1d1714',
+  surface2: '#29201b',
+  text: '#f1e7d3',
+  textSub: '#a59580',
+  line: '#382c24',
+  drawer: '#120e0c',
+  memo: '#3a2e22',
+  memoText: '#f4e6c8',
+}
+
 export const DEFAULT_THEME = {
-  preset: 'oneui',
-  mode: 'auto',
+  preset: 'hanafuda',
+  mode: 'dark',
   allowToggle: true,
-  light: ONEUI_LIGHT,
-  dark: ONEUI_DARK,
+  light: HW_LIGHT,
+  dark: HW_DARK,
 
   // 배경
   bgType: 'solid', // solid | gradient | image | pattern
@@ -134,7 +169,7 @@ export const DEFAULT_THEME = {
 
   // 글자
   font: 'pretendard',
-  headingFont: 'same',
+  headingFont: 'hw-mincho',
   customFontUrl: '',
   fontScale: 1,
   titleWeight: 800,
@@ -142,27 +177,27 @@ export const DEFAULT_THEME = {
   lineHeight: 1.8,
 
   // 모양
-  radius: 26,
-  cardStyle: 'flat', // flat | shadow | outline | glass | soft | sticker
-  gap: 14,
-  contentWidth: 760,
-  buttonShape: 'pill', // pill | rounded | square
+  radius: 8,
+  cardStyle: 'hanafuda', // hanafuda | flat | shadow | outline | glass | soft | sticker
+  gap: 16,
+  contentWidth: 880,
+  buttonShape: 'square', // pill | rounded | square
 
   // 배치
   headerStyle: 'expanded', // expanded | compact | centered
-  expandedHeight: 30,
+  expandedHeight: 26,
   titleTop: 72, // 큰 제목 위 여백(px) — 홈을 뺀 모든 페이지(게시판·역극·페어 등)에 똑같이
   homeTitle: true,
   homeTitleHeight: 14, // 홈 큰 제목 영역 높이(vh). 다른 페이지 제목 높이(expandedHeight)와 따로예요
   homeTitleBg: 'none', // none | card | glass | image
   homeTitleImage: '',
   homeTitleDim: 0.35,
-  navStyle: 'drawer', // drawer | bottom | both
+  navStyle: 'both', // drawer | bottom | both (PC에서는 하단 탭 메뉴가 상단바 글자 메뉴로 보여요)
   drawerSide: 'left',
   homeLayout: 'swipe', // swipe | stack
-  homeFixed: true,
+  homeFixed: false,
   homeAlign: 'top', // 홈 위젯 세로 정렬: top | center | bottom (페이지마다 따로 정할 수도 있어요) // 홈 화면을 한 화면 높이에 고정(스크롤 없음)
-  dots: 'pill', // pill | dot | line | number | none
+  dots: 'dot', // pill | dot | line | number | none
   dotsPosition: 'bottom',
 
   // 목록
@@ -174,6 +209,12 @@ export const DEFAULT_THEME = {
 
   // 효과
   animations: true,
+  // 화투 장식 (효과 · 모드에서 켜고 꺼요)
+  hwDecor: true, // 붉은 해 · 물결 · 큰 한자 배경
+  hwPetals: true, // 흩날리는 꽃잎
+  hwCursor: true, // 먹 번짐 커서 고리
+  hwWipe: true, // 페이지를 넘길 때 막이 스치는 효과
+  hwDuotone: true, // 목록 사진을 붉은 판화처럼 칠하고, 마우스를 올리면 원래 색으로
   hoverLift: true,
   iconStyle: 'solid',
   scrollbarColor: '', // 비우면 포인트 색
@@ -203,6 +244,71 @@ export const DEFAULT_THEME = {
 }
 
 export const PRESETS = [
+  { key: 'hanafuda', label: '花札 야앵 (밤 · 주홍)', theme: { mode: 'dark', light: HW_LIGHT, dark: HW_DARK, bgType: 'solid', cardStyle: 'hanafuda', radius: 8, font: 'pretendard', headingFont: 'hw-mincho', buttonShape: 'square' } },
+  {
+    key: 'washi',
+    label: '和紙 화지 (낮 · 종이)',
+    theme: { mode: 'light', light: HW_LIGHT, dark: HW_DARK, bgType: 'solid', cardStyle: 'hanafuda', radius: 6, font: 'pretendard', headingFont: 'zen-old', buttonShape: 'square' },
+  },
+  {
+    key: 'matsu',
+    label: '松 송학 (솔잎 · 붉은 해)',
+    theme: {
+      mode: 'dark',
+      light: { ...HW_LIGHT, accent: '#c62f22', bg: '#e9ead9', bg2: '#d5dcc0', surface: '#f7f7ec', surface2: '#e7eadb', line: '#d1d6bd', drawer: '#e9ead9', text: '#17201a' },
+      dark: { ...HW_DARK, accent: '#e2452f', bg: '#0e1612', bg2: '#173024', surface: '#14201a', surface2: '#1d2c24', line: '#26382e', drawer: '#0b120e', text: '#ece6d2', textSub: '#9aa594' },
+      bgType: 'gradient',
+      bgAngle: 170,
+      cardStyle: 'hanafuda',
+      radius: 8,
+      headingFont: 'hw-mincho',
+      buttonShape: 'square',
+    },
+  },
+  {
+    key: 'fuji',
+    label: '藤 등꽃 (보랏빛 밤)',
+    theme: {
+      mode: 'dark',
+      light: { ...HW_LIGHT, accent: '#7b4bb3', bg: '#efe9f2', bg2: '#ddd0ea', surface: '#fbf8fc', surface2: '#eee6f3', line: '#dccfe6', drawer: '#efe9f2', text: '#1e1726' },
+      dark: { ...HW_DARK, accent: '#b48ae6', bg: '#120e1a', bg2: '#251a38', surface: '#1a1524', surface2: '#251e33', line: '#30273f', drawer: '#0e0b15', text: '#efe7f6', textSub: '#a397b3' },
+      bgType: 'gradient',
+      bgAngle: 200,
+      cardStyle: 'hanafuda',
+      radius: 10,
+      headingFont: 'zen-old',
+      buttonShape: 'square',
+    },
+  },
+  {
+    key: 'tsuki',
+    label: '芒 공산명월 (먹 · 금빛 달)',
+    theme: {
+      mode: 'dark',
+      light: { ...HW_LIGHT, accent: '#a8792c', bg: '#f1ebdc', bg2: '#e6d9b8', surface: '#fbf7ec', line: '#e0d2ae', drawer: '#f1ebdc' },
+      dark: { ...HW_DARK, accent: '#d9b25f', accentText: '#1a140c', bg: '#0b0a09', bg2: '#1d1810', surface: '#151311', surface2: '#201c17', line: '#2f2920', drawer: '#090807', text: '#efe6d0' },
+      bgType: 'solid',
+      cardStyle: 'hanafuda',
+      radius: 4,
+      headingFont: 'zen-antique',
+      buttonShape: 'square',
+    },
+  },
+  {
+    key: 'beni',
+    label: '紅 베니 (온통 주홍)',
+    theme: {
+      mode: 'light',
+      light: { ...HW_LIGHT, accent: '#16110f', accentText: '#f6ead6', bg: '#c9281e', bg2: '#9e1a12', surface: '#f6ecdb', surface2: '#ecdfc8', text: '#16110f', textSub: '#6b5546', line: '#e0cdb0', drawer: '#f3e7d2' },
+      dark: { ...HW_DARK, accent: '#e0402f', bg: '#3a0d09', bg2: '#170605', surface: '#1d1210', surface2: '#2a1a16' },
+      bgType: 'gradient',
+      bgAngle: 160,
+      cardStyle: 'hanafuda',
+      radius: 6,
+      headingFont: 'hw-mincho',
+      buttonShape: 'square',
+    },
+  },
   { key: 'oneui', label: 'One UI 블루', theme: { light: ONEUI_LIGHT, dark: ONEUI_DARK, bgType: 'solid', cardStyle: 'flat', radius: 26, font: 'pretendard' } },
   {
     key: 'mint',

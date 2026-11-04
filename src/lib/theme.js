@@ -195,6 +195,8 @@ export function applyTheme(theme, mode) {
   root.dataset.anim = theme.animations ? 'on' : 'off'
   root.dataset.lift = theme.hoverLift ? 'on' : 'off'
   root.dataset.icons = theme.iconStyle
+  root.dataset.duotone = theme.hwDuotone === false ? 'off' : 'on'
+  root.dataset.bg = theme.bgType || 'solid'
   root.style.colorScheme = mode
 
   const bgImage = mode === 'dark' && theme.bgImageDark ? theme.bgImageDark : theme.bgImage

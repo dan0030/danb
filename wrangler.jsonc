@@ -1,7 +1,7 @@
 {
   // Cloudflare Workers 설정 파일입니다. 자세한 배포 방법은 README.md를 참고하세요.
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "if",
+  "name": "danb",
   "main": "worker/index.js",
   "compatibility_date": "2025-09-01",
   // 배포 전에 화면(dist)을 먼저 빌드합니다. (Cloudflare 자동 배포에서도 동작)
@@ -18,15 +18,16 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "if-db",
-      "database_id": "592d89e8-2ccb-409f-b16b-b76cf6c5ba00"
+      // 원본(IF)과 데이터가 섞이지 않도록 새 데이터베이스를 써요.
+      // database_id를 비워두면 처음 배포할 때 wrangler가 danb-db를 자동으로 만들어서 연결해요.
+      "database_name": "danb-db"
     }
   ],
   // 올린 사진·파일은 R2에 저장돼요. (글·설정은 D1)
   "r2_buckets": [
     {
       "binding": "BUCKET",
-      "bucket_name": "if-files"
+      "bucket_name": "danb-files"
     }
   ]
 }
