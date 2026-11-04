@@ -1,0 +1,1143 @@
+/* ==================================================================
+   역극 로그 페이지
+   ================================================================== */
+
+.rp-page {
+  --wc: var(--accent);
+}
+.rp-intro {
+  margin: -6px 4px 18px;
+  color: var(--text-sub);
+  font-size: 0.92rem;
+  line-height: 1.7;
+  white-space: pre-line;
+}
+
+.rp-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.rp-search {
+  flex: 1 1 280px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 0 8px 0 16px;
+  height: 46px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+  color: var(--text-sub);
+}
+.rp-search:focus-within {
+  border-color: var(--accent);
+}
+.rp-search input,
+.rp-search input:focus,
+.rp-search input:focus-visible {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  height: 100%;
+  color: var(--text);
+  outline: none;
+}
+.rp-search-clear {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--text-sub);
+}
+.rp-admin {
+  display: flex;
+  gap: 8px;
+}
+
+/* 세계선 탭 */
+/* 세계선 탭 + 정렬 버튼 한 줄 */
+.rp-listbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  margin-bottom: 14px;
+}
+.rp-listbar > .segmented {
+  flex: none;
+}
+.rp-worlds {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 2px 2px 4px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.rp-worlds::-webkit-scrollbar {
+  display: none;
+}
+.rp-worlds button {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 15px;
+  border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-sub);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+.rp-worlds button small {
+  font-size: 0.74rem;
+  font-weight: 600;
+  opacity: 0.7;
+}
+.rp-worlds button.active {
+  background: color-mix(in srgb, var(--wc) 14%, var(--surface));
+  border-color: color-mix(in srgb, var(--wc) 45%, transparent);
+  color: color-mix(in srgb, var(--wc) 60%, var(--text));
+}
+.rp-world-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--wc) 85%, var(--text));
+}
+.rp-world-desc {
+  margin: 0 4px 16px;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--text-sub);
+  white-space: pre-line;
+}
+.rp-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.rp-filters .chip button {
+  margin-left: 4px;
+  border: none;
+  background: none;
+  color: inherit;
+  padding: 0 2px;
+}
+.rp-filter-count {
+  font-size: 0.82rem;
+  color: var(--text-sub);
+  margin-left: 4px;
+}
+
+/* 역극 카드 */
+/* 카드는 높이 제한 없이 벽돌처럼 쌓여요 */
+/* 카드 목록: 정한 개수만큼 한 줄에 놓고, 왼쪽에서 오른쪽으로 순서대로 읽혀요. (역극 설정 › 목록) */
+.rp-grid {
+  --rp-cols: 3;
+  display: grid;
+  grid-template-columns: repeat(var(--rp-cols), minmax(0, 1fr));
+  gap: 12px;
+  align-items: start;
+  margin-bottom: 18px;
+}
+@media (max-width: 900px) {
+  .rp-grid {
+    grid-template-columns: repeat(min(var(--rp-cols), 2), minmax(0, 1fr));
+  }
+}
+@media (max-width: 560px) {
+  .rp-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.rp-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+  overflow: hidden;
+  transition: transform 0.2s var(--ease), box-shadow 0.2s;
+}
+.rp-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+}
+.rp-card-link {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 18px 12px;
+  color: inherit;
+}
+.rp-card-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.rp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 750;
+  line-height: 1.2;
+}
+.rp-badge.world {
+  background: color-mix(in srgb, var(--wc) 14%, var(--surface));
+  color: color-mix(in srgb, var(--wc) 60%, var(--text));
+}
+.rp-badge.status {
+  background: var(--surface-2);
+  color: var(--text-sub);
+}
+.rp-badge.s-ongoing {
+  background: color-mix(in srgb, #22a06b 15%, var(--surface));
+  color: color-mix(in srgb, #22a06b 75%, var(--text));
+}
+.rp-badge.s-done {
+  background: color-mix(in srgb, var(--text) 9%, var(--surface));
+  color: var(--text);
+}
+.rp-pin {
+  margin-left: auto;
+  font-size: 0.78rem;
+  color: var(--text-sub);
+}
+.rp-card-title {
+  font-size: 1.05rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.rp-card-title .fa-lock {
+  font-size: 0.85em;
+  color: var(--text-sub);
+}
+.rp-card-meta {
+  font-size: 0.78rem;
+  color: var(--text-sub);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.rp-card-desc,
+.rp-card-snippet {
+  font-size: 0.86rem;
+  line-height: 1.65;
+  color: var(--text-sub);
+  white-space: pre-line;
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+.rp-card-snippet {
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  white-space: normal;
+}
+.rp-card mark,
+.rp-card-snippet mark {
+  padding: 0 1px;
+  border-radius: 3px;
+  background: color-mix(in srgb, #ffd54a 55%, transparent);
+  color: inherit;
+}
+.rp-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 0 18px 14px;
+}
+.rp-card-tags button {
+  padding: 3px 9px;
+  border: none;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text-sub);
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.rp-card-tags button:hover {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+
+/* 글 보기: 제목 앞 태그 + 제목 아래 기간·설명 */
+.rp-title-tags {
+  --wc: var(--accent);
+  display: inline-flex;
+  gap: 6px;
+  margin-right: 10px;
+  vertical-align: 0.28em;
+}
+.rp-title-tags .rp-badge {
+  font-size: 0.8rem;
+  letter-spacing: 0;
+}
+.rp-post-info {
+  margin: 10px 0 4px;
+}
+.rp-post-info p {
+  margin: 8px auto 0;
+  max-width: 560px;
+  font-size: 0.92rem;
+  line-height: 1.7;
+  color: var(--text-sub);
+  white-space: pre-line;
+}
+
+/* 글쓰기의 역극 정보 칸 */
+.rp-write {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 16px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+}
+.rp-write .fields-heading {
+  margin-top: 0;
+}
+.rp-write .segmented {
+  flex-wrap: wrap;
+}
+.rp-write .field {
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .rp-admin {
+    width: 100%;
+  }
+  .rp-admin .btn {
+    flex: 1;
+  }
+}
+
+/* 카드의 대표 대사 */
+.rp-card-quote {
+  display: block;
+  margin: 2px 0;
+}
+
+/* ---------------- 대본: 대사(두상 + 말풍선) · 지문 ---------------- */
+
+.rp-ava {
+  --cc: var(--accent);
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--cc) 18%, var(--surface));
+  color: color-mix(in srgb, var(--cc) 60%, var(--text));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--cc) 45%, transparent);
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+.rp-ava img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+.rp-say-row {
+  --cc: var(--accent);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 14px 0;
+}
+.rp-say-row.right {
+  flex-direction: row-reverse;
+}
+.rp-say-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  max-width: min(78%, 620px);
+}
+.rp-say-row.right .rp-say-body {
+  align-items: flex-end;
+}
+.rp-say-name {
+  font-size: 0.78rem;
+  font-weight: 750;
+  color: color-mix(in srgb, var(--cc) 60%, var(--text));
+  padding: 0 4px;
+}
+.rp-bubble {
+  padding: 11px 15px;
+  border-radius: 6px 20px 20px 20px;
+  background: color-mix(in srgb, var(--cc) 13%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--cc) 22%, transparent);
+  line-height: 1.7;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+.rp-say-row.right .rp-bubble {
+  border-radius: 20px 6px 20px 20px;
+}
+/* 대사 모양: 시스템 창 (역극 설정 › 대사 모양) — 게임 시스템 창처럼 가운데에, 이름·두상 없이.
+   라이트·다크 모드와 상관없이 어두운 반투명 판에 밝은 글자, 테두리·빛·모서리 꺾쇠는 캐릭터 색. */
+.rp-say-row.system {
+  justify-content: center;
+  margin: 22px 0;
+}
+.rp-sys {
+  position: relative;
+  width: min(86%, 540px);
+  padding: 16px 22px;
+  border: 1px solid color-mix(in srgb, var(--cc) 60%, transparent);
+  border-radius: 4px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 40%),
+    rgba(14, 18, 30, 0.92);
+  color: #eef4ff;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 0 18px color-mix(in srgb, var(--cc) 35%, transparent),
+    0 8px 24px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: rp-sys-in 0.35s var(--ease) both;
+}
+@keyframes rp-sys-in {
+  from {
+    opacity: 0;
+    transform: scaleY(0.6);
+  }
+}
+:root[data-anim='off'] .rp-sys {
+  animation: none;
+}
+.rp-sys-corner {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border: 0 solid var(--cc);
+}
+.rp-sys-corner.tl {
+  top: -1px;
+  left: -1px;
+  border-width: 2px 0 0 2px;
+}
+.rp-sys-corner.tr {
+  top: -1px;
+  right: -1px;
+  border-width: 2px 2px 0 0;
+}
+.rp-sys-corner.bl {
+  bottom: -1px;
+  left: -1px;
+  border-width: 0 0 2px 2px;
+}
+.rp-sys-corner.br {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 2px 2px 0;
+}
+.rp-sys-body {
+  text-align: center;
+  line-height: 1.8;
+  letter-spacing: 0.02em;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  text-shadow: 0 0 8px color-mix(in srgb, var(--cc) 30%, transparent);
+}
+.rp-sys-body:has(ruby) {
+  padding-top: 4px;
+  line-height: 2.15;
+}
+.rp-sys-body ruby {
+  display: inline-block;
+  position: relative;
+  max-width: 100%;
+}
+.rp-sys-body ruby rt {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  transform: translateX(-50%);
+  margin-bottom: -0.1em;
+  width: max-content;
+  max-width: max(100%, 14em);
+  font-size: 0.55em;
+  line-height: 1;
+  white-space: normal;
+  opacity: 0.85;
+}
+.rp-say-row.system.compact {
+  margin: 0;
+}
+.rp-say-row.system.compact .rp-sys {
+  width: 100%;
+  padding: 10px 14px;
+}
+.rp-say-row.system.compact .rp-sys-body {
+  font-size: 0.86rem;
+  line-height: 1.6;
+}
+.rp-say-row.compact {
+  margin: 0;
+  gap: 9px;
+}
+.rp-say-row.compact .rp-say-body {
+  max-width: calc(100% - 44px);
+}
+.rp-say-row.compact .rp-bubble {
+  padding: 8px 12px;
+  font-size: 0.86rem;
+  line-height: 1.6;
+}
+.rp-say-row.compact .rp-say-name {
+  font-size: 0.72rem;
+}
+/* 대사·지문 글자 꾸밈 */
+.rp-dot {
+  font-style: normal;
+  -webkit-text-emphasis: filled dot;
+  text-emphasis: filled dot;
+  -webkit-text-emphasis-position: over right;
+  text-emphasis-position: over right;
+}
+/* 루비: 밑글자는 원래 너비·띄어쓰기 그대로 두고, 작은 글은 밑글자 가운데 위에 띄워요.
+   (루비가 밑글자보다 길어도 밑글자 사이가 벌어지지 않고, 짧아도 글자가 흩어지지 않게) */
+.rp-bubble ruby,
+.rp-act-view ruby,
+.rp-hr ruby,
+.rp-inline-preview ruby {
+  /* 한 덩어리로 다뤄서, 문장처럼 긴 밑글자가 줄바꿈돼도 작은 글이 그 덩어리 가운데 위에 오게 해요. */
+  display: inline-block;
+  position: relative;
+  max-width: 100%;
+  text-indent: 0;
+}
+.rp-bubble ruby rt,
+.rp-act-view ruby rt,
+.rp-hr ruby rt,
+.rp-inline-preview ruby rt {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  transform: translateX(-50%);
+  margin-bottom: -0.1em;
+  font-size: 0.55em;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0;
+  text-align: center;
+  text-indent: 0;
+  /* 짧은 밑글자에는 조금 길게 넘쳐도 한 줄로, 그보다 길면 밑글자(문장) 너비 안에서 줄바꿈해요. */
+  width: max-content;
+  max-width: max(100%, 14em);
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  opacity: 0.85;
+  pointer-events: none;
+}
+.rp-bubble rp,
+.rp-act-view rp,
+.rp-hr rp,
+.rp-inline-preview rp {
+  display: none;
+}
+/* 루비가 있는 문단은 위 줄과 겹치지 않게 줄 간격을 조금 넓혀요. */
+.rp-bubble:has(ruby),
+.rp-inline-preview:has(ruby) {
+  line-height: 2.15;
+}
+.rp-bubble:has(ruby) {
+  padding-top: 15px;
+}
+/* 목록 카드의 작은 말풍선도 작은 글이 말풍선 밖으로 나가지 않게 */
+.rp-say-row.compact .rp-bubble:has(ruby) {
+  padding-top: 13px;
+  line-height: 2.1;
+}
+.rp-act-view p:has(ruby) {
+  line-height: 2.2;
+}
+/* 구분선 (장면 전환) · 모양은 블록마다 고를 수 있어요 */
+.rp-hr {
+  --_hr: var(--hr-c, color-mix(in srgb, var(--text) 22%, transparent));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  width: 100%;
+  margin: 30px auto;
+  padding: 0 8px;
+  box-sizing: border-box;
+  color: var(--hr-c, var(--text-sub));
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.rp-hr.gap-s {
+  margin-block: 14px;
+}
+.rp-hr.gap-l {
+  margin-block: 56px;
+}
+.rp-hr.w-short {
+  max-width: 36%;
+}
+.rp-hr.w-mid {
+  max-width: 66%;
+}
+/* 선 모양: 가운데 글 양옆으로 선 */
+.rp-hr.is-line::before,
+.rp-hr.is-line::after {
+  content: '';
+  flex: 1;
+  height: 0;
+  border-top: 1px solid var(--_hr);
+}
+.rp-hr.kind-dashed::before,
+.rp-hr.kind-dashed::after {
+  border-top-style: dashed;
+}
+.rp-hr.kind-dotted::before,
+.rp-hr.kind-dotted::after {
+  border-top: 2px dotted var(--_hr);
+}
+.rp-hr.kind-double::before,
+.rp-hr.kind-double::after {
+  border-top: 3px double var(--_hr);
+}
+/* 흐린 선(기본): 글이 없으면 양 끝이 흐려지는 한 줄 */
+.rp-hr.kind-fade::before,
+.rp-hr.kind-fade::after {
+  height: 1px;
+  border: none;
+  background: var(--_hr);
+}
+.rp-hr.kind-fade:not(.has-text)::before {
+  background: linear-gradient(90deg, transparent, var(--_hr) 25%, var(--_hr) 75%, transparent);
+}
+.rp-hr.is-line:not(.has-text)::after {
+  display: none;
+}
+.rp-hr-cap {
+  flex: none;
+  max-width: 70%;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+/* 기호 모양: 기호 아래에 가운데 글 */
+.rp-hr.is-mark {
+  flex-direction: column;
+  gap: 8px;
+}
+.rp-hr-mark {
+  max-width: 100%;
+  white-space: pre;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 1rem;
+  line-height: 1;
+  letter-spacing: 0.1em;
+  color: var(--hr-c, color-mix(in srgb, var(--text) 45%, transparent));
+}
+.rp-hr.is-mark .rp-hr-cap {
+  max-width: 100%;
+  font-size: 0.78rem;
+}
+/* 빈 여백: 선 없이 장면만 띄워요 */
+.rp-hr.is-blank {
+  height: 1.4em;
+}
+/* 지문은 소설처럼 */
+.rp-act-view {
+  margin: 18px 0;
+  padding: 0 6px;
+}
+.rp-act-view p {
+  margin: 0 0 0.9em;
+  line-height: 1.95;
+  color: color-mix(in srgb, var(--text) 82%, var(--text-sub));
+  text-align: justify;
+  text-justify: inter-character;
+  word-break: normal;
+  line-break: normal;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+.rp-act-view p:last-child {
+  margin-bottom: 0;
+}
+.rp-script-view {
+  margin: 8px 0 4px;
+}
+
+/* ---------------- 대본 편집기 ---------------- */
+
+.rp-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+}
+.rp-editor-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.rp-editor-head strong {
+  font-size: 0.95rem;
+}
+.rp-editor-head span {
+  font-size: 0.8rem;
+  color: var(--text-sub);
+}
+.rp-editor-head .btn {
+  margin-left: auto;
+}
+.rp-block {
+  position: relative;
+  padding: 10px 10px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+.rp-block-say {
+  --cc: var(--accent);
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.rp-speaker-pick {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.rp-speaker-pick button {
+  padding: 2px;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  background: none;
+  opacity: 0.45;
+  transition: opacity 0.2s, border-color 0.2s;
+}
+.rp-speaker-pick button.active {
+  opacity: 1;
+  border-color: var(--cc);
+}
+.rp-block-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.rp-block-name,
+.rp-block-label {
+  font-size: 0.76rem;
+  font-weight: 750;
+  color: color-mix(in srgb, var(--cc, var(--text)) 60%, var(--text));
+}
+.rp-block-label {
+  color: var(--text-sub);
+}
+.rp-block textarea {
+  width: 100%;
+  min-height: 42px;
+  resize: none;
+  overflow: hidden;
+  line-height: 1.7;
+}
+.rp-bubble-input {
+  border-radius: 6px 18px 18px 18px !important;
+  background: color-mix(in srgb, var(--cc) 12%, var(--surface)) !important;
+}
+.rp-block-hr {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+/* 구분선 블록 편집 */
+.rp-hr-kinds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.rp-hr-kinds button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-sub);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+.rp-hr-kinds button.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.rp-hr-chip-line {
+  width: 18px;
+  height: 0;
+  border-top: 1.5px solid currentColor;
+}
+.rp-hr-chip-line.kind-fade {
+  height: 1.5px;
+  border: none;
+  background: linear-gradient(90deg, transparent, currentColor 30%, currentColor 70%, transparent);
+}
+.rp-hr-chip-line.kind-dashed {
+  border-top-style: dashed;
+}
+.rp-hr-chip-line.kind-dotted {
+  border-top: 2px dotted currentColor;
+}
+.rp-hr-chip-line.kind-double {
+  border-top: 3px double currentColor;
+}
+.rp-hr-more {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-sub);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+.rp-hr-more:hover,
+.rp-hr-more.active {
+  background: var(--surface);
+  color: var(--text);
+}
+.rp-hr-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--surface);
+}
+.rp-hr-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  font-weight: 650;
+  color: var(--text-sub);
+}
+.rp-hr-colors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.rp-hr-colors button,
+.rp-hr-custom-color {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+.rp-hr-colors button.active,
+.rp-hr-custom-color.active {
+  border-color: var(--accent);
+}
+.rp-hr-colors i {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--line);
+}
+.rp-hr-colors i.is-default {
+  background: linear-gradient(135deg, var(--surface-2) 45%, color-mix(in srgb, var(--text) 30%, transparent) 50%, var(--surface-2) 55%);
+}
+.rp-hr-custom-color {
+  overflow: hidden;
+  font-size: 0.66rem;
+  color: #fff;
+  background: conic-gradient(#e5484d, #d6a000, #30a46c, #0090ff, #8e4ec6, #e5484d);
+}
+.rp-hr-custom-color input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.rp-hr-preview {
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface) 50%, transparent);
+}
+.rp-hr-input {
+  width: 100%;
+  text-align: center;
+  background: var(--surface) !important;
+  border-style: dashed !important;
+}
+/* 꾸밈 도구 (누른 글칸 위에 나와요) */
+.rp-format-bar {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  width: fit-content;
+  max-width: 100%;
+}
+.rp-format-bar > button {
+  min-width: 30px;
+  height: 28px;
+  padding: 0 6px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-sub);
+  font-size: 0.8rem;
+}
+.rp-format-bar > button:hover,
+.rp-format-bar > button.active {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.rp-ruby-btn ruby {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.rp-ruby-btn rt {
+  font-size: 0.5em;
+}
+.rp-format-colors {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 5;
+  display: flex;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+.rp-format-colors button,
+.rp-format-custom {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--line);
+  cursor: pointer;
+}
+.rp-format-custom {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  font-size: 0.7rem;
+  color: var(--text-sub);
+  background: conic-gradient(#e5484d, #d6a000, #30a46c, #0090ff, #8e4ec6, #e5484d);
+}
+.rp-format-custom i {
+  color: #fff;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+}
+.rp-format-custom input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.rp-inline-preview {
+  padding: 8px 12px;
+  border-left: 3px solid var(--line);
+  border-radius: 0 8px 8px 0;
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
+  font-size: 0.88rem;
+  line-height: 1.9;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+.rp-act-input {
+  background: var(--surface) !important;
+}
+.rp-block-act {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.rp-block-tools {
+  display: flex;
+  justify-content: flex-end;
+  gap: 2px;
+  margin-top: 6px;
+}
+.rp-block-tools button {
+  width: 30px;
+  height: 28px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-sub);
+  font-size: 0.78rem;
+}
+.rp-block-tools button:hover:not(:disabled) {
+  background: var(--surface);
+  color: var(--text);
+}
+.rp-block-tools button.active {
+  color: #f0a500;
+}
+.rp-block-tools button.danger:hover {
+  color: var(--danger);
+}
+.rp-block-tools button:disabled {
+  opacity: 0.3;
+}
+.rp-add-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 4px;
+}
+.rp-add-btn {
+  --cc: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px 6px 6px;
+  border: 1px dashed color-mix(in srgb, var(--cc) 55%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--cc) 8%, var(--surface));
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--cc) 60%, var(--text));
+  cursor: pointer;
+}
+.rp-add-btn.act {
+  padding-left: 14px;
+  border-color: var(--line);
+  background: var(--surface);
+  color: var(--text-sub);
+}
+.rp-import-text {
+  width: 100%;
+  line-height: 1.7;
+}
+
+/* 글쓰기: 등장 캐릭터 · 대표 대사 */
+.rp-cast-pick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.rp-cast-pick button {
+  --cc: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px 4px 4px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 650;
+  color: var(--text-sub);
+  cursor: pointer;
+}
+.rp-cast-pick button.active {
+  border-color: color-mix(in srgb, var(--cc) 50%, transparent);
+  background: color-mix(in srgb, var(--cc) 12%, var(--surface));
+  color: var(--text);
+}
+.rp-cast-pick button i {
+  font-size: 0.72rem;
+  color: color-mix(in srgb, var(--cc) 70%, var(--text));
+}
+.rp-quote-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+@media (max-width: 640px) {
+  .rp-say-body {
+    max-width: calc(100% - 58px);
+  }
+  .rp-editor {
+    padding: 12px;
+  }
+}
+
+/* 소설·HTML로 변환 창 */
+.rp-export-preview {
+  max-height: 360px;
+  overflow: auto;
+  margin-bottom: 10px;
+  padding: 12px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  background: var(--bg);
+}
+.rp-export-text {
+  width: 100%;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+.rp-export-text.code {
+  font-size: 0.78rem;
+}

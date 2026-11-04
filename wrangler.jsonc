@@ -1,0 +1,32 @@
+{
+  // Cloudflare Workers 설정 파일입니다. 자세한 배포 방법은 README.md를 참고하세요.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "if",
+  "main": "worker/index.js",
+  "compatibility_date": "2025-09-01",
+  // 배포 전에 화면(dist)을 먼저 빌드합니다. (Cloudflare 자동 배포에서도 동작)
+  "build": { "command": "npm run build" },
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    // 페이지(HTML)도 Worker를 거쳐서 로딩 화면에 사이트 색을 미리 넣어요. 빌드된 파일(/assets)은 바로 내보내요.
+    "run_worker_first": ["/*", "!/assets/*"]
+  },
+  // Worker를 데이터베이스(D1) 가까운 곳에서 돌려서, 질의를 여러 번 하는 게시판 요청이 빨라지게 해요.
+  "placement": { "mode": "smart" },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "if-db",
+      "database_id": "592d89e8-2ccb-409f-b16b-b76cf6c5ba00"
+    }
+  ],
+  // 올린 사진·파일은 R2에 저장돼요. (글·설정은 D1)
+  "r2_buckets": [
+    {
+      "binding": "BUCKET",
+      "bucket_name": "if-files"
+    }
+  ]
+}
