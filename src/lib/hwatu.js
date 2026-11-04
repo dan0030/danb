@@ -50,6 +50,28 @@ const ROUTE_KANJI = {
   admin: '司',
 }
 
+// 배경에 크게 깔리는 윤곽선 영문 (레퍼런스의 HOPE · STAR // MOON처럼)
+const ROUTE_WORD = {
+  home: 'HANAFUDA',
+  archive: 'ARCHIVE',
+  category: 'RECORD',
+  tag: 'TAG',
+  tags: 'TAGS',
+  search: 'SEARCH',
+  notice: 'NOTICE',
+  post: 'STORY',
+  guestbook: 'LETTER',
+  calendar: 'CALENDAR',
+  banners: 'BANNER',
+  login: 'LOGIN',
+  write: 'WRITE',
+  admin: 'SETTING',
+}
+
+export function routeWord(name) {
+  return ROUTE_WORD[name] || 'PAGE'
+}
+
 export function routeKanji(name) {
   return ROUTE_KANJI[name] || '月'
 }

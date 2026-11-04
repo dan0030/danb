@@ -63,7 +63,8 @@ export default function Home() {
   useTopbarTitle(theme.homeTitle ? undefined : site.title)
 
   // 휴대폰 홈 화면처럼 스크롤 없이 한 화면 안에 배치해요. (편집 중이거나 '아래로 이어보기'일 땐 스크롤 가능)
-  const fixed = theme.homeLayout !== 'stack' && theme.homeFixed !== false && !editing
+  // 홈은 한 화면에 위젯 블록을 쌓아서 아래로 스크롤해요. (예전의 '한 화면 고정' 설정은 쓰지 않아요)
+  const fixed = false
   useEffect(() => {
     document.documentElement.classList.toggle('home-fixed', fixed)
     return () => document.documentElement.classList.remove('home-fixed')
@@ -116,7 +117,7 @@ export default function Home() {
       {editing ? (
         <HomeEditor draft={draft} setDraft={setDraft} startTarget={layoutKey} onCancel={() => setEditing(false)} onSave={saveDraft} />
       ) : (
-        <HomePages key={layoutKey} home={home} layout={theme.homeLayout} dots={theme.dots} dotsPosition={theme.dotsPosition} onQuickUpdate={app.admin && !IN_PREVIEW ? quickUpdate : null} fixed={fixed} admin={app.admin && !isMobile} align={theme.homeAlign || 'top'} />
+        <HomePages key={layoutKey} home={home} layout="stack" dots="none" dotsPosition="bottom" onQuickUpdate={app.admin && !IN_PREVIEW ? quickUpdate : null} fixed={fixed} admin={app.admin && !isMobile} align={theme.homeAlign || 'top'} />
       )}
       {app.admin && !editing && !IN_PREVIEW && (
         <button type="button" className="fab" onClick={startEdit} aria-label="홈 화면 편집">
@@ -560,57 +561,6 @@ function HomeEditor({ draft, setDraft, startTarget = 'pc', onCancel, onSave }) {
       <div className={`edit-pages target-${target}`}>
       {layout.pages.map((page, pi) => (
         <section key={page.id} className="edit-page">
-          <div className="edit-page-head">
-            <span className="edit-page-name">{pi + 1}페이지</span>
-            <div className="segmented small page-align-pick" role="radiogroup" aria-label={`${pi + 1}페이지 위젯 정렬`}>
-              {[
-                ['', '기본', 'fa-solid fa-rotate-left'],
-                ['top', '위', 'fa-solid fa-arrow-up-long'],
-                ['center', '가운데', 'fa-solid fa-arrows-up-down'],
-                ['bottom', '아래', 'fa-solid fa-arrow-down-long'],
-              ].map(([v, label, icon]) => (
-                <button
-                  type="button"
-                  key={v || 'default'}
-                  role="radio"
-                  aria-checked={(page.align || '') === v}
-                  className={(page.align || '') === v ? 'active' : ''}
-                  title={v ? `위젯을 ${label}에 맞추기` : '디자인 설정(배치)을 따라요'}
-                  onClick={() =>
-                    update((d) => {
-                      if (v) d.pages[pi].align = v
-                      else delete d.pages[pi].align
-                    })
-                  }
-                >
-                  <i className={icon} /> {label}
-                </button>
-              ))}
-            </div>
-            <div className="row gap-xs">
-              <button type="button" className="icon-btn small" disabled={pi === 0} onClick={() => update((d) => d.pages.splice(pi - 1, 0, d.pages.splice(pi, 1)[0]))} aria-label="페이지 앞으로">
-                <i className="fa-solid fa-arrow-up" />
-              </button>
-              <button
-                type="button"
-                className="icon-btn small"
-                disabled={pi === layout.pages.length - 1}
-                onClick={() => update((d) => d.pages.splice(pi + 1, 0, d.pages.splice(pi, 1)[0]))}
-                aria-label="페이지 뒤로"
-              >
-                <i className="fa-solid fa-arrow-down" />
-              </button>
-              <button
-                type="button"
-                className="icon-btn small danger"
-                disabled={layout.pages.length === 1}
-                onClick={() => window.confirm(`${pi + 1}페이지와 위젯을 모두 지울까요?`) && update((d) => d.pages.splice(pi, 1))}
-                aria-label="페이지 삭제"
-              >
-                <i className="fa-solid fa-trash" />
-              </button>
-            </div>
-          </div>
           <div
             className="widget-grid"
             onDragOver={(e) => e.preventDefault()}
@@ -701,9 +651,6 @@ function HomeEditor({ draft, setDraft, startTarget = 'pc', onCancel, onSave }) {
 
       </div>
 
-      <button type="button" className="btn block" onClick={() => update((d) => d.pages.push({ id: uid('page'), widgets: [] }))}>
-        <i className="fa-solid fa-plus" /> 페이지 추가
-      </button>
         </>
       )}
 

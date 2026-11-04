@@ -118,40 +118,40 @@ const ONEUI_DARK = {
   memoText: '#f6f2d8',
 }
 
-// 화투(花札) 기본 색: 밤은 먹빛 위 주홍, 낮은 화지(和紙) 위 주홍
+// 화투(花札) 기본 색: 흰 종이 위 다홍과 먹 한 가지씩만 쓰는 단색 구성
 const HW_LIGHT = {
-  accent: '#c8281e',
-  accentText: '#fff8ec',
-  bg: '#efe6d4',
-  bg2: '#e2d2b4',
-  surface: '#faf5ea',
-  surface2: '#f0e6d3',
-  text: '#1c1613',
-  textSub: '#6f6152',
-  line: '#dccdb1',
-  drawer: '#efe6d4',
-  memo: '#f6e7c4',
-  memoText: '#2b2016',
+  accent: '#c8102e',
+  accentText: '#ffffff',
+  bg: '#f3f1ed',
+  bg2: '#e9e5de',
+  surface: '#ffffff',
+  surface2: '#f2efea',
+  text: '#141414',
+  textSub: '#6b6862',
+  line: '#dedad3',
+  drawer: '#ffffff',
+  memo: '#f7f2e7',
+  memoText: '#2a241c',
 }
 
 const HW_DARK = {
-  accent: '#e0402f',
-  accentText: '#fff8ec',
-  bg: '#14100e',
-  bg2: '#2a1712',
-  surface: '#1d1714',
-  surface2: '#29201b',
-  text: '#f1e7d3',
-  textSub: '#a59580',
-  line: '#382c24',
-  drawer: '#120e0c',
-  memo: '#3a2e22',
-  memoText: '#f4e6c8',
+  accent: '#e3263f',
+  accentText: '#ffffff',
+  bg: '#0f0f10',
+  bg2: '#1a1112',
+  surface: '#18181a',
+  surface2: '#222225',
+  text: '#f2f0eb',
+  textSub: '#9a9893',
+  line: '#2c2c2f',
+  drawer: '#141416',
+  memo: '#2a2622',
+  memoText: '#f2ebdd',
 }
 
 export const DEFAULT_THEME = {
   preset: 'hanafuda',
-  mode: 'dark',
+  mode: 'light',
   allowToggle: true,
   light: HW_LIGHT,
   dark: HW_DARK,
@@ -177,7 +177,7 @@ export const DEFAULT_THEME = {
   lineHeight: 1.8,
 
   // 모양
-  radius: 8,
+  radius: 2,
   cardStyle: 'hanafuda', // hanafuda | flat | shadow | outline | glass | soft | sticker
   gap: 16,
   contentWidth: 880,
@@ -192,9 +192,9 @@ export const DEFAULT_THEME = {
   homeTitleBg: 'none', // none | card | glass | image
   homeTitleImage: '',
   homeTitleDim: 0.35,
-  navStyle: 'both', // drawer | bottom | both (PC에서는 하단 탭 메뉴가 상단바 글자 메뉴로 보여요)
+  navStyle: 'drawer', // drawer(메뉴바만) | both(휴대폰에서 하단 탭도) — 예전 값 bottom은 both처럼 써요
   drawerSide: 'left',
-  homeLayout: 'swipe', // swipe | stack
+  homeLayout: 'stack', // 홈은 한 화면에 블록으로 쌓아요 (예전 값 swipe는 쓰지 않아요)
   homeFixed: false,
   homeAlign: 'top', // 홈 위젯 세로 정렬: top | center | bottom (페이지마다 따로 정할 수도 있어요) // 홈 화면을 한 화면 높이에 고정(스크롤 없음)
   dots: 'dot', // pill | dot | line | number | none
@@ -210,9 +210,7 @@ export const DEFAULT_THEME = {
   // 효과
   animations: true,
   // 화투 장식 (효과 · 모드에서 켜고 꺼요)
-  hwDecor: true, // 붉은 해 · 물결 · 큰 한자 배경
-  hwPetals: true, // 흩날리는 꽃잎
-  hwCursor: true, // 먹 번짐 커서 고리
+  hwDecor: true, // 사선 띠 · 점 무늬 · 큰 영문 글씨 배경
   hwWipe: true, // 페이지를 넘길 때 막이 스치는 효과
   hwDuotone: true, // 목록 사진을 붉은 판화처럼 칠하고, 마우스를 올리면 원래 색으로
   hoverLift: true,
@@ -244,68 +242,61 @@ export const DEFAULT_THEME = {
 }
 
 export const PRESETS = [
-  { key: 'hanafuda', label: '花札 야앵 (밤 · 주홍)', theme: { mode: 'dark', light: HW_LIGHT, dark: HW_DARK, bgType: 'solid', cardStyle: 'hanafuda', radius: 8, font: 'pretendard', headingFont: 'hw-mincho', buttonShape: 'square' } },
+  { key: 'hanafuda', label: '紅白 홍백 (흰 종이 · 다홍)', theme: { mode: 'light', light: HW_LIGHT, dark: HW_DARK, bgType: 'solid', cardStyle: 'hanafuda', radius: 2, font: 'pretendard', headingFont: 'hw-mincho', buttonShape: 'square' } },
+  { key: 'sumi', label: '墨 먹 (검정 · 다홍)', theme: { mode: 'dark', light: HW_LIGHT, dark: HW_DARK, bgType: 'solid', cardStyle: 'hanafuda', radius: 2, font: 'pretendard', headingFont: 'hw-mincho', buttonShape: 'square' } },
   {
-    key: 'washi',
-    label: '和紙 화지 (낮 · 종이)',
-    theme: { mode: 'light', light: HW_LIGHT, dark: HW_DARK, bgType: 'solid', cardStyle: 'hanafuda', radius: 6, font: 'pretendard', headingFont: 'zen-old', buttonShape: 'square' },
+    key: 'beni',
+    label: '紅 베니 (다홍 바탕)',
+    theme: {
+      mode: 'light',
+      light: { ...HW_LIGHT, accent: '#141414', accentText: '#ffffff', bg: '#c8102e', bg2: '#a50d26', surface: '#ffffff', surface2: '#f4efe9', drawer: '#ffffff' },
+      dark: { ...HW_DARK, bg: '#3b0a12', surface: '#1a1112', surface2: '#26181a', line: '#3a2326' },
+      bgType: 'solid',
+      cardStyle: 'hanafuda',
+      radius: 2,
+      headingFont: 'hw-mincho',
+      buttonShape: 'square',
+    },
   },
   {
     key: 'matsu',
-    label: '松 송학 (솔잎 · 붉은 해)',
+    label: '松 송학 (솔잎 · 다홍)',
     theme: {
-      mode: 'dark',
-      light: { ...HW_LIGHT, accent: '#c62f22', bg: '#e9ead9', bg2: '#d5dcc0', surface: '#f7f7ec', surface2: '#e7eadb', line: '#d1d6bd', drawer: '#e9ead9', text: '#17201a' },
-      dark: { ...HW_DARK, accent: '#e2452f', bg: '#0e1612', bg2: '#173024', surface: '#14201a', surface2: '#1d2c24', line: '#26382e', drawer: '#0b120e', text: '#ece6d2', textSub: '#9aa594' },
-      bgType: 'gradient',
-      bgAngle: 170,
+      mode: 'light',
+      light: { ...HW_LIGHT, accent: '#c8102e', bg: '#eef0ea', surface: '#ffffff', surface2: '#e8ece4', line: '#d6dccf', text: '#16201a', textSub: '#5f6a61' },
+      dark: { ...HW_DARK, accent: '#e3263f', bg: '#0d1410', surface: '#141d18', surface2: '#1c2721', line: '#26332b', drawer: '#101813' },
+      bgType: 'solid',
       cardStyle: 'hanafuda',
-      radius: 8,
+      radius: 2,
       headingFont: 'hw-mincho',
       buttonShape: 'square',
     },
   },
   {
     key: 'fuji',
-    label: '藤 등꽃 (보랏빛 밤)',
+    label: '藤 등꽃 (연보라 · 먹)',
     theme: {
-      mode: 'dark',
-      light: { ...HW_LIGHT, accent: '#7b4bb3', bg: '#efe9f2', bg2: '#ddd0ea', surface: '#fbf8fc', surface2: '#eee6f3', line: '#dccfe6', drawer: '#efe9f2', text: '#1e1726' },
-      dark: { ...HW_DARK, accent: '#b48ae6', bg: '#120e1a', bg2: '#251a38', surface: '#1a1524', surface2: '#251e33', line: '#30273f', drawer: '#0e0b15', text: '#efe7f6', textSub: '#a397b3' },
-      bgType: 'gradient',
-      bgAngle: 200,
+      mode: 'light',
+      light: { ...HW_LIGHT, accent: '#6a3fa0', bg: '#f1eff4', surface: '#ffffff', surface2: '#ece8f1', line: '#dcd6e5', text: '#19151f', textSub: '#686172' },
+      dark: { ...HW_DARK, accent: '#a98be0', bg: '#100e14', surface: '#18151d', surface2: '#221e29', line: '#2d2836', drawer: '#14111a' },
+      bgType: 'solid',
       cardStyle: 'hanafuda',
-      radius: 10,
+      radius: 2,
       headingFont: 'zen-old',
       buttonShape: 'square',
     },
   },
   {
     key: 'tsuki',
-    label: '芒 공산명월 (먹 · 금빛 달)',
+    label: '芒 공산명월 (먹 · 금빛)',
     theme: {
       mode: 'dark',
-      light: { ...HW_LIGHT, accent: '#a8792c', bg: '#f1ebdc', bg2: '#e6d9b8', surface: '#fbf7ec', line: '#e0d2ae', drawer: '#f1ebdc' },
-      dark: { ...HW_DARK, accent: '#d9b25f', accentText: '#1a140c', bg: '#0b0a09', bg2: '#1d1810', surface: '#151311', surface2: '#201c17', line: '#2f2920', drawer: '#090807', text: '#efe6d0' },
+      light: { ...HW_LIGHT, accent: '#9a6f22', bg: '#f2efe8', surface: '#ffffff', line: '#e0d8c6' },
+      dark: { ...HW_DARK, accent: '#d4ad5c', accentText: '#141414', bg: '#0b0b0b', surface: '#151515', surface2: '#1f1f1f', line: '#2b2b2b', drawer: '#111111' },
       bgType: 'solid',
       cardStyle: 'hanafuda',
-      radius: 4,
+      radius: 0,
       headingFont: 'zen-antique',
-      buttonShape: 'square',
-    },
-  },
-  {
-    key: 'beni',
-    label: '紅 베니 (온통 주홍)',
-    theme: {
-      mode: 'light',
-      light: { ...HW_LIGHT, accent: '#16110f', accentText: '#f6ead6', bg: '#c9281e', bg2: '#9e1a12', surface: '#f6ecdb', surface2: '#ecdfc8', text: '#16110f', textSub: '#6b5546', line: '#e0cdb0', drawer: '#f3e7d2' },
-      dark: { ...HW_DARK, accent: '#e0402f', bg: '#3a0d09', bg2: '#170605', surface: '#1d1210', surface2: '#2a1a16' },
-      bgType: 'gradient',
-      bgAngle: 160,
-      cardStyle: 'hanafuda',
-      radius: 6,
-      headingFont: 'hw-mincho',
       buttonShape: 'square',
     },
   },
@@ -461,20 +452,10 @@ export const DEFAULT_HOME = {
         { id: 'w-s3', type: 'shortcut', size: 'S', config: { label: '방명록', icon: 'fa-regular fa-comment-dots', href: '/guestbook' } },
         { id: 'w-s4', type: 'shortcut', size: 'S', config: { label: '태그', icon: 'fa-solid fa-hashtag', href: '/tags' } },
         { id: 'w-recent', type: 'recent', size: 'L', config: { title: '최근 기록', count: 4, style: 'list' } },
-      ],
-    },
-    {
-      id: 'page-2',
-      widgets: [
         { id: 'w-cal', type: 'calendar', size: 'L', config: { title: '이번 달' } },
         { id: 'w-notice', type: 'notice', size: 'L', config: { source: 'latest', count: 2 } },
         { id: 'w-todo', type: 'todo', size: 'M', config: { title: '하고 싶은 것', items: [{ text: '같이 노을 보기', done: false }, { text: '첫 편지 쓰기', done: true }] } },
         { id: 'w-quote', type: 'quote', size: 'M', config: { title: '오늘의 한마디', items: [{ text: '오늘도 네 생각.' }, { text: '천천히, 오래오래.' }] } },
-      ],
-    },
-    {
-      id: 'page-3',
-      widgets: [
         { id: 'w-gallery', type: 'gallery', size: 'L', config: { title: '갤러리', source: 'posts', count: 6, columns: 3 } },
         { id: 'w-tags', type: 'tagcloud', size: 'L', config: { title: '태그' } },
       ],
@@ -535,6 +516,17 @@ export function resolveTheme(theme) {
   return deepMerge(DEFAULT_THEME, theme || {})
 }
 
+// 홈 화면은 한 화면에 위젯을 블록으로 쌓는 방식이에요.
+// 예전(옆으로 넘기는 여러 페이지)에 저장한 배치는 페이지 순서대로 한 페이지에 이어 붙여요.
+export function flattenPages(pages) {
+  const list = Array.isArray(pages) ? pages.filter(Boolean) : []
+  if (list.length <= 1) return list.length ? [{ ...list[0], widgets: list[0].widgets || [] }] : [{ id: 'page-1', widgets: [] }]
+  return [{ id: list[0].id || 'page-1', widgets: list.flatMap((p) => p.widgets || []) }]
+}
+
 export function resolveHome(home) {
-  return home?.pages?.length ? home : DEFAULT_HOME
+  const base = home?.pages?.length ? home : DEFAULT_HOME
+  const out = { ...base, pages: flattenPages(base.pages) }
+  if (base.mobile?.pages) out.mobile = { ...base.mobile, pages: flattenPages(base.mobile.pages) }
+  return out
 }

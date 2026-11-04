@@ -18,9 +18,10 @@
   "d1_databases": [
     {
       "binding": "DB",
-      // 원본(IF)과 데이터가 섞이지 않도록 새 데이터베이스를 써요.
-      // database_id를 비워두면 처음 배포할 때 wrangler가 danb-db를 자동으로 만들어서 연결해요.
-      "database_name": "danb-db"
+      // 원본(IF)과 데이터가 섞이지 않도록 따로 만든 데이터베이스(danb-db)를 써요.
+      // 첫 배포 때 자동으로 만들어진 데이터베이스의 id를 적어두어, 다음 배포부터는 늘 같은 데이터베이스에 연결돼요.
+      "database_name": "danb-db",
+      "database_id": "1ae00995-04db-4a0d-af80-6b4cca3075de"
     }
   ],
   // 올린 사진·파일은 R2에 저장돼요. (글·설정은 D1)

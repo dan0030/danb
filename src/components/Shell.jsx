@@ -3,66 +3,95 @@ import { swapNames, useApp } from '../lib/store.jsx'
 import { matchRoute, navigate, scrollRoot, scrollTop, useLocation } from '../lib/router.js'
 import { api } from '../lib/api.js'
 import { isRecent } from '../lib/format.js'
-import { MONTHS, SEASONS, currentMonth, kanjiNumber, monthAt, pad2, routeKanji } from '../lib/hwatu.js'
-import { BgmCard } from './Bgm.jsx'
+import { MONTHS, SEASONS, currentMonth, pad2, routeKanji, routeWord } from '../lib/hwatu.js'
+import { BgmCard, useBgm } from './Bgm.jsx'
 
 /* ==================================================================
-   화투(花札) 레이아웃
-   - 위: 도장 메뉴 버튼 · 사이트 이름 · 메뉴 글자 · 페어 이름 상자
-   - 뒤: 붉은 해 · 물결 무늬 · 페이지마다 바뀌는 큰 한자 · 꽃잎
-   - 메뉴: 화투패가 펼쳐지는 전체 화면 서랍
-   - 아래: 큰 글자 바닥글 · 계절 점 · '이달의 패'
+   花札 · 단색 레이아웃
+   - 머리말(상단바) 없이, 왼쪽(또는 오른쪽)에 접었다 펼 수 있는 메뉴바 하나에 모든 메뉴를 모아요.
+     PC: 펼치면 이름·메뉴·카테고리·검색·BGM이 다 보이고, 접으면 아이콘 줄만 남아요.
+     휴대폰: 구석의 메뉴 버튼을 누르면 메뉴바가 옆에서 밀려 나와요.
+   - 뒤: 사선 띠 · 점 무늬 · 가는 원 · 페이지마다 바뀌는 윤곽선 영문
    ================================================================== */
 
 const TitleContext = createContext({ setTitle: () => {}, setCollapsed: () => {} })
 
 const reduceMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+const SIDE_KEY = 'hw-side-collapsed'
+
+function readCollapsed() {
+  try {
+    return localStorage.getItem(SIDE_KEY) === '1'
+  } catch {
+    return false
+  }
+}
 
 export function Shell({ children }) {
   const app = useApp()
   const loc = useLocation()
-  const [drawerOpen, setDrawerOpen] = useState(false)
-  const [title, setTitle] = useState('')
-  const [collapsed, setCollapsed] = useState(true)
-  const nav = app.theme.navStyle
-  // 배경이 사진·패턴이면 본문을 두루마리 판 위에 올려서 글자가 잘 보이게 해요.
   const t = app.theme
+  const [collapsed, setCollapsed] = useState(readCollapsed)
+  const [mobileOpen, setMobileOpen] = useState(false)
+  // 예전에 고른 'bottom'(하단 탭만)은 '메뉴바 + 하단 탭'으로 봐요.
+  const nav = t.navStyle === 'drawer' ? 'drawer' : 'both'
+  const side = t.drawerSide === 'right' ? 'right' : 'left'
+  // 배경이 사진·패턴이면 본문을 판 위에 올려서 글자가 잘 보이게 해요.
   const busyBg = t.bgType === 'image' || t.bgType === 'pattern'
   const useFrame = (t.contentFrame === 'always' || (t.contentFrame !== 'never' && busyBg)) && (loc.path !== '/' || t.frameOnHome)
   const route = matchRoute(loc.path).name
   const anim = t.animations !== false
 
   useEffect(() => {
-    setDrawerOpen(false)
+    setMobileOpen(false)
   }, [loc.path, loc.search])
 
   useEffect(() => {
-    document.body.classList.toggle('no-scroll', drawerOpen)
-    if (!drawerOpen) return
-    const onKey = (e) => e.key === 'Escape' && setDrawerOpen(false)
+    document.body.classList.toggle('no-scroll', mobileOpen)
+    if (!mobileOpen) return
+    const onKey = (e) => e.key === 'Escape' && setMobileOpen(false)
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [drawerOpen])
+  }, [mobileOpen])
+
+  function toggleCollapsed() {
+    setCollapsed((v) => {
+      try {
+        localStorage.setItem(SIDE_KEY, v ? '0' : '1')
+      } catch {
+        // 저장 못 해도 괜찮아요
+      }
+      return !v
+    })
+  }
+
+  // 휴대폰에서는 메뉴바를 열고 닫고, PC에서는 접고 펴요.
+  const isNarrow = () => window.matchMedia?.('(max-width: 899px)').matches
+  const onMenu = () => (isNarrow() ? setMobileOpen(true) : toggleCollapsed())
 
   return (
-    <TitleContext.Provider value={{ setTitle, setCollapsed }}>
-      <div className={`app hw nav-${nav} route-${route}`}>
-        {t.hwDecor !== false && <Backdrop route={route} petals={anim && t.hwPetals !== false} />}
+    <TitleContext.Provider value={{ setTitle: noop, setCollapsed: noop }}>
+      <div className={`app hw side-${side} ${collapsed ? 'side-collapsed' : 'side-expanded'} ${mobileOpen ? 'side-mobile-open' : ''} nav-${nav} route-${route}`}>
+        {t.hwDecor !== false && <Backdrop route={route} />}
         {anim && t.hwWipe !== false && <RouteWipe path={loc.path} />}
-        {nav !== 'bottom' && <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />}
-        <div className={`drawer-dim ${drawerOpen ? 'active' : ''}`} onClick={() => setDrawerOpen(false)} />
-        {/* 본문 창을 쓸 땐 상단바 버튼들이 창의 머리줄 안으로 들어가요. */}
-        {!useFrame && <TopBar title={title} collapsed={collapsed} onMenu={() => setDrawerOpen(true)} showMenu={nav !== 'bottom'} path={loc.path} />}
+        <Sidebar collapsed={collapsed} onToggle={toggleCollapsed} mobileOpen={mobileOpen} onCloseMobile={() => setMobileOpen(false)} path={loc.path} />
+        <div className={`drawer-dim ${mobileOpen ? 'active' : ''}`} onClick={() => setMobileOpen(false)} />
+        <button type="button" className="hw-menu-fab" onClick={() => setMobileOpen(true)} aria-label="메뉴 열기" aria-expanded={mobileOpen}>
+          <span className="hw-bars" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
+        </button>
         <main className={`page ${useFrame ? 'framed' : ''}`} id="main">
           {/* 창을 켜고 끌 때도 본문이 다시 그려지지 않도록 늘 같은 구조로 감싸요. (관리 화면 입력값이 사라지지 않게) */}
-          <BrowserFrame on={useFrame} path={loc.path + loc.search} showUrl={app.theme.frameBar !== false} onMenu={nav !== 'bottom' ? () => setDrawerOpen(true) : null}>
+          <BrowserFrame on={useFrame} path={loc.path + loc.search} showUrl={t.frameBar !== false} onMenu={onMenu}>
             {children}
           </BrowserFrame>
         </main>
         <Footer />
-        {nav !== 'drawer' && <BottomNav path={loc.path} />}
+        {nav === 'both' && <BottomNav path={loc.path} />}
         <ScrollButtons />
-        {anim && t.hwCursor !== false && (!t.cursor || t.cursor === 'default') && <InkCursor />}
         {app.toast && (
           <div className="toast" key={app.toast.id} role="status">
             {app.toast.message}
@@ -73,7 +102,9 @@ export function Shell({ children }) {
   )
 }
 
-// 큰 제목 없이 상단바 제목만 정할 때 씁니다.
+function noop() {}
+
+// 예전에 상단바 제목을 정하던 곳에서 쓰던 함수예요. 머리말이 없어져서 지금은 아무것도 하지 않아요.
 export function useTopbarTitle(title) {
   const { setTitle, setCollapsed } = useContext(TitleContext)
   useEffect(() => {
@@ -83,44 +114,31 @@ export function useTopbarTitle(title) {
   }, [title, setTitle, setCollapsed])
 }
 
-/* 페이지 큰 제목. 붉은 도장(페이지 한자)이 찍히고 제목 아래로 붓 선이 그어져요.
-   스크롤해서 제목이 사라지면 상단바에 작은 제목이 나타나요. */
+/* 페이지 큰 제목: 작은 붉은 도장 · 영문 단어 · 가는 선 */
 // pageKey를 주면 관리 › 페이지 문구에서 바꾼 제목·문구가 기본값 대신 쓰여요.
 export function LargeTitle({ pageKey, title: defaultTitle, subtitle: defaultSubtitle, children, eyebrow: defaultEyebrow, className = '', style }) {
-  const { setTitle, setCollapsed } = useContext(TitleContext)
-  const ref = useRef(null)
   const { site } = useApp()
   const loc = useLocation()
   const custom = (pageKey && site.pages?.[pageKey]) || {}
   const title = custom.title || defaultTitle
   const subtitle = custom.hideSubtitle ? null : custom.subtitle ? <span dangerouslySetInnerHTML={{ __html: swapNames(custom.subtitle, site) }} /> : defaultSubtitle
   const eyebrow = custom.eyebrow ? <span dangerouslySetInnerHTML={{ __html: swapNames(custom.eyebrow, site) }} /> : defaultEyebrow
-  const kanji = routeKanji(matchRoute(loc.path).name)
-
-  useEffect(() => {
-    setTitle(title)
-    const el = ref.current
-    if (!el || !('IntersectionObserver' in window)) return
-    const io = new IntersectionObserver(([entry]) => setCollapsed(!entry.isIntersecting), { rootMargin: '-64px 0px 0px 0px' })
-    io.observe(el)
-    return () => {
-      io.disconnect()
-      setCollapsed(true)
-    }
-  }, [title, setTitle, setCollapsed])
+  const name = matchRoute(loc.path).name
 
   return (
     <header className={`large-title ${custom.align ? `align-${custom.align}` : ''} ${className}`} style={style}>
       <div className="large-title-inner">
-        <span className="hw-seal" aria-hidden="true">
-          {kanji}
-        </span>
+        <div className="hw-title-meta" aria-hidden="true">
+          <span className="hw-seal">{routeKanji(name)}</span>
+          <span className="hw-title-word">{routeWord(name)}</span>
+          <i />
+        </div>
         {custom.image && <img className="large-title-image" src={custom.image} alt="" />}
         {eyebrow && <div className="large-title-eyebrow">{eyebrow}</div>}
-        <h1 ref={ref}>
+        <h1>
           <span className="hw-title-text">{title}</span>
         </h1>
-        <span className="hw-brush" aria-hidden="true" />
+        <span className="hw-rule" aria-hidden="true" />
         {subtitle && <div className="large-title-sub">{subtitle}</div>}
         {children}
       </div>
@@ -128,124 +146,45 @@ export function LargeTitle({ pageKey, title: defaultTitle, subtitle: defaultSubt
   )
 }
 
-/* ---------------- 화투패 (메뉴·카테고리·바닥글에서 같이 써요) ---------------- */
+/* ---------------- 화투패 (메뉴바·바닥글에서 같이 써요) ---------------- */
 
-export function HwCard({ month, icon, label, size = 'm', flip = true, className = '' }) {
+export function HwCard({ month, size = 'm', className = '' }) {
   const m = month || MONTHS[0]
   return (
-    <span className={`hw-card size-${size} tone-${m.tone} ${flip ? 'can-flip' : ''} ${className}`} aria-hidden="true">
-      <span className="hw-card-inner">
-        <span className="hw-card-face">
-          <span className="hw-card-sun" />
-          <span className="hw-card-kanji">{m.kanji}</span>
-          <span className="hw-card-no">{m.jp}</span>
-          {icon && <i className={`hw-card-icon ${icon}`} />}
-        </span>
-        {flip && (
-          <span className="hw-card-back">
-            <span className="hw-card-back-label">{label || m.ko}</span>
-          </span>
-        )}
-      </span>
+    <span className={`hw-card size-${size} tone-${m.tone} ${className}`} aria-hidden="true">
+      <span className="hw-card-sun" />
+      <span className="hw-card-kanji">{m.kanji}</span>
+      <span className="hw-card-no">{m.jp}</span>
     </span>
   )
 }
 
-/* ---------------- 상단바 ---------------- */
+/* ---------------- 메뉴바 ---------------- */
 
-function TopBar({ title, collapsed, onMenu, showMenu, path }) {
-  const app = useApp()
-  const { site } = app
-  const items = app.theme.navStyle !== 'drawer' ? bottomNavItems(app) : []
-  const [scrolled, setScrolled] = useState(false)
-  const pair = site.pair || {}
-
-  useEffect(() => {
-    const on = () => setScrolled(scrollTop() > 12)
-    on()
-    window.addEventListener('scroll', on, { capture: true, passive: true })
-    return () => window.removeEventListener('scroll', on, { capture: true })
-  }, [])
-
-  return (
-    <header className={`topbar hw-top ${collapsed ? 'show-title' : ''} ${scrolled ? 'scrolled' : ''}`}>
-      <div className="topbar-inner">
-        {showMenu ? (
-          <button type="button" className="hw-menu-btn" onClick={onMenu} aria-label="메뉴 열기">
-            <span className="hw-menu-lines" aria-hidden="true">
-              <i />
-              <i />
-              <i />
-            </span>
-            <span className="hw-menu-kanji" aria-hidden="true">
-              札
-            </span>
-          </button>
-        ) : (
-          <a href="/" className="hw-menu-btn" aria-label="홈">
-            <span className="hw-menu-kanji always" aria-hidden="true">
-              花
-            </span>
-          </a>
-        )}
-        <a href="/" className="hw-brand" aria-label={`${site.title} 홈`}>
-          <span className="hw-brand-text">
-            <strong>{site.title}</strong>
-            {site.description && <small>{site.description}</small>}
-          </span>
-        </a>
-        <div className="topbar-title" aria-hidden={!collapsed}>
-          {title}
-        </div>
-        {items.length > 0 && (
-          <nav className="hw-top-nav" aria-label="주 메뉴">
-            {items.map((item, i) => {
-              const active = item.href === '/' ? path === '/' : path.startsWith(item.href)
-              return (
-                <a key={i} href={item.href} className={active ? 'active' : ''} style={{ '--i': i }}>
-                  <span className="hw-top-nav-no">{pad2(i + 1)}</span>
-                  <span className="hw-top-nav-label">
-                    <span data-text={item.label}>{item.label}</span>
-                  </span>
-                </a>
-              )
-            })}
-          </nav>
-        )}
-        {(pair.me?.name || pair.partner?.name) && (
-          <a href="/" className="hw-pairbox" title={pair.pairName || ''}>
-            <span>{pair.me?.name}</span>
-            <i aria-hidden="true" />
-            <span>{pair.partner?.name}</span>
-          </a>
-        )}
-        <div className="topbar-actions">
-          <a href="/search" className="icon-btn" aria-label="검색">
-            <i className="fa-solid fa-magnifying-glass" />
-          </a>
-          {app.theme.allowToggle !== false && (
-            <button type="button" className="icon-btn hw-mode-btn" onClick={app.toggleMode} aria-label={app.mode === 'dark' ? '라이트 모드로' : '다크 모드로'}>
-              <i className={`fa-solid ${app.mode === 'dark' ? 'fa-sun' : 'fa-moon'}`} />
-            </button>
-          )}
-          {app.admin && (
-            <a href="/write" className="icon-btn accent" aria-label="글쓰기">
-              <i className="fa-solid fa-pen" />
-            </a>
-          )}
-        </div>
-      </div>
-    </header>
-  )
+export function bottomNavItems(app) {
+  const list = Array.isArray(app.theme.bottomNav) ? app.theme.bottomNav : app.site.bottomNav || []
+  return list.filter((it) => it && it.href && (!it.adminOnly || app.admin)).slice(0, 6)
 }
 
-/* ---------------- 서랍: 화투패가 펼쳐지는 전체 화면 메뉴 ---------------- */
-
-function Drawer({ open, onClose }) {
+function Sidebar({ collapsed, onToggle, mobileOpen, onCloseMobile, path }) {
   const app = useApp()
   const { site } = app
+  const bgm = useBgm()
   const [q, setQ] = useState('')
   const [openCats, setOpenCats] = useState({})
+  const asideRef = useRef(null)
+  const pair = site.pair || {}
+
+  // 휴대폰에서 닫혀 있을 땐 키보드 이동에서 빼요.
+  useEffect(() => {
+    const el = asideRef.current
+    if (!el) return
+    const mq = window.matchMedia?.('(max-width: 899px)')
+    const sync = () => (el.inert = !!mq?.matches && !mobileOpen)
+    sync()
+    mq?.addEventListener?.('change', sync)
+    return () => mq?.removeEventListener?.('change', sync)
+  }, [mobileOpen])
 
   async function logout() {
     await api.logout()
@@ -254,10 +193,18 @@ function Drawer({ open, onClose }) {
     navigate('/')
   }
 
-  const asideRef = useRef(null)
-  useEffect(() => {
-    if (asideRef.current) asideRef.current.inert = !open
-  }, [open])
+  // 주 메뉴(관리 › 디자인 › 배치에서 정해요) 뒤에, 거기 없는 기본 메뉴를 이어 붙여요.
+  const main = bottomNavItems(app)
+  const extra = [
+    { href: '/archive', icon: 'fa-solid fa-layer-group', label: '전체 기록', show: site.menu.archive },
+    { href: '/notice', icon: 'fa-solid fa-bullhorn', label: '공지', show: site.menu.notice },
+    { href: '/guestbook', icon: 'fa-regular fa-comment-dots', label: '방명록', show: site.menu.guestbook && site.features.guestbook !== false },
+    { href: '/calendar', icon: 'fa-regular fa-calendar', label: '캘린더', show: site.menu.calendar },
+    { href: '/tags', icon: 'fa-solid fa-hashtag', label: '태그', show: site.menu.tags },
+    { href: '/banners', icon: 'fa-solid fa-flag', label: '배너', show: site.menu.banners },
+  ].filter((x) => x.show && !main.some((m) => m.href === x.href))
+  const menu = [...(main.some((m) => m.href === '/') ? [] : [{ href: '/', icon: 'fa-solid fa-house', label: '홈' }]), ...main, ...extra]
+  const isActive = (href) => (href === '/' ? path === '/' : path === href || path.startsWith(`${href}/`) || path.startsWith(`${href}?`))
 
   const roots = app.categories.filter((c) => !c.parent_id)
   // 글 개수: 관리 › 사이트 › 메뉴에서 전체를 끄거나, 관리 › 카테고리에서 카테고리마다 숨길 수 있어요.
@@ -265,186 +212,178 @@ function Drawer({ open, onClose }) {
   const countOf = (c, n) => (showCounts && !c.hide_count ? <span className="cat-count">{n}</span> : null)
   const children = (id) => app.categories.filter((c) => c.parent_id === id)
   const links = (site.links || []).filter((l) => l.url && l.url !== '#')
-  const pair = site.pair || {}
-  const tiles = [
-    { href: '/', icon: 'fa-solid fa-house', label: '홈', show: true },
-    { href: '/notice', icon: 'fa-solid fa-bullhorn', label: '공지', show: site.menu.notice },
-    { href: '/guestbook', icon: 'fa-solid fa-comment-dots', label: '방명록', show: site.menu.guestbook && site.features.guestbook !== false },
-    { href: '/calendar', icon: 'fa-regular fa-calendar', label: '캘린더', show: site.menu.calendar },
-    { href: '/tags', icon: 'fa-solid fa-hashtag', label: '태그', show: site.menu.tags },
-    { href: '/banners', icon: 'fa-solid fa-flag', label: '배너', show: site.menu.banners },
-  ].filter((x) => x.show)
+  const modeLabel = app.mode === 'dark' ? '라이트 모드로' : '다크 모드로'
 
   return (
-    <aside ref={asideRef} className={`drawer hw-drawer ${open ? 'open' : ''}`} aria-label="메뉴">
-      <div className="hw-drawer-sun" aria-hidden="true" />
-      <div className="drawer-head">
-        <span className="drawer-title">
-          <em>札</em> MENU
-        </span>
-        <div className="drawer-head-actions">
-          {app.theme.allowToggle !== false && (
-            <button type="button" className="icon-btn" onClick={app.toggleMode} aria-label={app.mode === 'dark' ? '라이트 모드로' : '다크 모드로'} title={app.mode === 'dark' ? '라이트 모드' : '다크 모드'}>
-              <i className={`fa-solid ${app.mode === 'dark' ? 'fa-sun' : 'fa-moon'}`} />
-            </button>
-          )}
-          <button type="button" className="icon-btn hw-close" onClick={onClose} aria-label="메뉴 닫기">
-            <i className="fa-solid fa-xmark" />
-          </button>
+    <aside ref={asideRef} className={`hw-sidebar ${mobileOpen ? 'open' : ''}`} aria-label="메뉴">
+      <div className="hw-sb-head">
+        <button type="button" className="hw-sb-toggle desktop-only" onClick={onToggle} aria-label={collapsed ? '메뉴바 펼치기' : '메뉴바 접기'} aria-expanded={!collapsed} title={collapsed ? '펼치기' : '접기'}>
+          <span className="hw-bars" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
+        </button>
+        <button type="button" className="hw-sb-toggle mobile-only" onClick={onCloseMobile} aria-label="메뉴 닫기">
+          <i className="fa-solid fa-xmark" />
+        </button>
+        <a href="/" className="hw-sb-brand">
+          <strong>{site.title}</strong>
+          {site.description && <small>{site.description}</small>}
+        </a>
+      </div>
+
+      <div className="hw-sb-scroll">
+        {(pair.me?.name || pair.partner?.name) && (
+          <a href="/" className="hw-pairbox hw-sb-full" title={pair.pairName || ''}>
+            <span>{pair.me?.name}</span>
+            <i aria-hidden="true" />
+            <span>{pair.partner?.name}</span>
+          </a>
+        )}
+
+        <nav className="hw-sb-section" aria-label="주 메뉴">
+          <span className="hw-sb-label">
+            <b>壱</b> MENU
+          </span>
+          {menu.map((item, i) => (
+            <a key={item.href + i} href={item.href} className={`hw-sb-link ${isActive(item.href) ? 'active' : ''}`} title={item.label} style={{ '--i': i }}>
+              <i className={`hw-sb-icon ${item.icon || 'fa-solid fa-circle'}`} />
+              <span className="hw-sb-text">{item.label}</span>
+              <span className="hw-sb-no">{pad2(i + 1)}</span>
+            </a>
+          ))}
+        </nav>
+
+        {(roots.length > 0 || app.admin) && (
+          <nav className="hw-sb-section hw-sb-cats" aria-label="카테고리">
+            <span className="hw-sb-label">
+              <b>弐</b> CATEGORY
+            </span>
+            {roots.map((c) => {
+              const kids = children(c.id)
+              const isOpen = openCats[c.id]
+              const href = `/category/${encodeURIComponent(c.slug)}`
+              return (
+                <div key={c.id} className={`cat-item ${isOpen ? 'open' : ''}`}>
+                  <a href={href} className={`hw-sb-link ${isActive(href) ? 'active' : ''}`} title={c.name}>
+                    <i className={`hw-sb-icon ${c.icon || 'fa-solid fa-folder'}`} />
+                    <span className="hw-sb-text">{c.name}</span>
+                    {isRecent(c.latest) && <span className="new-badge hw-sb-full">N</span>}
+                    <span className="hw-sb-full">{countOf(c, c.count + kids.reduce((s, k) => s + k.count, 0))}</span>
+                  </a>
+                  {kids.length > 0 && (
+                    <>
+                      <button
+                        type="button"
+                        className="cat-toggle hw-sb-full"
+                        onClick={() => setOpenCats((s) => ({ ...s, [c.id]: !s[c.id] }))}
+                        aria-label={`${c.name} 하위 카테고리 ${isOpen ? '접기' : '펼치기'}`}
+                        aria-expanded={!!isOpen}
+                      >
+                        <i className="fa-solid fa-chevron-right" />
+                      </button>
+                      <div className="cat-children hw-sb-full">
+                        {kids.map((k) => {
+                          const kh = `/category/${encodeURIComponent(k.slug)}`
+                          return (
+                            <a key={k.id} href={kh} className={`hw-sb-link sub ${isActive(kh) ? 'active' : ''}`}>
+                              <span className="hw-sb-text">{k.name}</span>
+                              {isRecent(k.latest) && <span className="new-badge">N</span>}
+                              {countOf(k, k.count)}
+                            </a>
+                          )
+                        })}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )
+            })}
+            {!roots.length && app.admin && (
+              <a href="/admin/categories" className="hw-sb-link muted" title="카테고리 만들기">
+                <i className="hw-sb-icon fa-solid fa-plus" />
+                <span className="hw-sb-text">카테고리 만들기</span>
+              </a>
+            )}
+          </nav>
+        )}
+
+        <div className="hw-sb-section hw-sb-full">
+          <span className="hw-sb-label">
+            <b>参</b> SEARCH
+          </span>
+          <form
+            className="search-field"
+            onSubmit={(e) => {
+              e.preventDefault()
+              if (q.trim()) navigate(`/search?q=${encodeURIComponent(q.trim())}`)
+            }}
+          >
+            <i className="fa-solid fa-magnifying-glass" />
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="검색어 입력..." aria-label="검색어" />
+          </form>
+        </div>
+
+        {links.length > 0 && (
+          <div className="hw-sb-section hw-sb-full">
+            <span className="hw-sb-label">
+              <b>四</b> LINK
+            </span>
+            <div className="hw-sb-links">
+              {links.map((l, i) => (
+                <a key={i} href={l.url} target="_blank" rel="noopener noreferrer" title={l.name}>
+                  <i className={l.icon || 'fa-solid fa-link'} />
+                  <span>{l.name}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="hw-sb-full hw-sb-bgm">
+          <BgmCard />
         </div>
       </div>
-      <div className="drawer-scroll">
-        <div className="hw-drawer-grid">
-          <section className="hw-drawer-intro">
-            <div className="hw-drawer-vertical" aria-hidden="true">
-              {site.title}
-            </div>
-            <div className="hw-drawer-pair">
-              <span className="hw-drawer-pair-label">PAIR</span>
-              <strong>{pair.pairName || site.title}</strong>
-              {pair.bio && <p>{pair.bio}</p>}
-            </div>
-            <form
-              className="search-field"
-              onSubmit={(e) => {
-                e.preventDefault()
-                if (q.trim()) navigate(`/search?q=${encodeURIComponent(q.trim())}`)
-              }}
-            >
-              <i className="fa-solid fa-magnifying-glass" />
-              <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="검색어 입력..." aria-label="검색어" />
-            </form>
-            <div className="drawer-foot">
-              <div className="drawer-account">
-                {app.admin ? (
-                  <>
-                    <a href="/write">
-                      <i className="fa-solid fa-pen" /> 글쓰기
-                    </a>
-                    <a href="/admin">
-                      <i className="fa-solid fa-gear" /> 관리
-                    </a>
-                    <button type="button" onClick={logout}>
-                      <i className="fa-solid fa-right-from-bracket" /> 로그아웃
-                    </button>
-                  </>
-                ) : (
-                  <a href="/login">
-                    <i className="fa-solid fa-right-to-bracket" /> 로그인
-                  </a>
-                )}
-              </div>
-              <BgmCard />
-            </div>
-          </section>
 
-          <section className="hw-drawer-main">
-            <div className="drawer-section">
-              <span className="section-label">
-                <b>壱</b> MENU
-              </span>
-              <nav className="drawer-tiles hw-hand">
-                {tiles.map((x, i) => (
-                  <a key={x.href} href={x.href} className="drawer-tile" style={{ '--i': i, '--n': tiles.length }}>
-                    <HwCard month={monthAt(i)} icon={x.icon} label={x.label} />
-                    <span className="drawer-tile-label">{x.label}</span>
-                  </a>
-                ))}
-              </nav>
-            </div>
-
-            <div className="drawer-section">
-              <span className="section-label">
-                <b>弐</b> CATEGORY
-              </span>
-              <nav className="drawer-cats">
-                {site.menu.archive && (
-                  <a href="/archive" className="cat-link" style={{ '--i': 0 }}>
-                    <span className="hw-cat-no">00</span>
-                    <i className="cat-icon fa-solid fa-layer-group" />
-                    <span>전체 기록</span>
-                    {showCounts && <span className="cat-count">{app.stats.posts || 0}</span>}
-                  </a>
-                )}
-                {roots.map((c, ci) => {
-                  const kids = children(c.id)
-                  const isOpen = openCats[c.id]
-                  const m = monthAt(ci)
-                  return (
-                    <div key={c.id} className={`cat-item ${isOpen ? 'open' : ''}`} style={{ '--i': ci + 1 }}>
-                      <a href={`/category/${encodeURIComponent(c.slug)}`} className="cat-link">
-                        <span className="hw-cat-no">{pad2(ci + 1)}</span>
-                        <i className={`cat-icon ${c.icon || 'fa-solid fa-folder'}`} />
-                        <span>{c.name}</span>
-                        <span className="hw-cat-kanji" aria-hidden="true">
-                          {m.kanji}
-                        </span>
-                        {isRecent(c.latest) && <span className="new-badge">N</span>}
-                        {countOf(c, c.count + kids.reduce((s, k) => s + k.count, 0))}
-                      </a>
-                      {kids.length > 0 && (
-                        <>
-                          <button
-                            type="button"
-                            className="cat-toggle"
-                            onClick={() => setOpenCats((s) => ({ ...s, [c.id]: !s[c.id] }))}
-                            aria-label={`${c.name} 하위 카테고리 ${isOpen ? '접기' : '펼치기'}`}
-                            aria-expanded={!!isOpen}
-                          >
-                            <i className="fa-solid fa-chevron-right" />
-                          </button>
-                          <div className="cat-children">
-                            {kids.map((k) => (
-                              <a key={k.id} href={`/category/${encodeURIComponent(k.slug)}`} className="cat-link sub">
-                                <i className={`cat-icon ${k.icon || 'fa-regular fa-folder'}`} />
-                                <span>{k.name}</span>
-                                {isRecent(k.latest) && <span className="new-badge">N</span>}
-                                {countOf(k, k.count)}
-                              </a>
-                            ))}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  )
-                })}
-                {!roots.length && app.admin && (
-                  <a href="/admin/categories" className="cat-link muted">
-                    <i className="cat-icon fa-solid fa-plus" />
-                    <span>카테고리 만들기</span>
-                  </a>
-                )}
-              </nav>
-            </div>
-
-            {links.length > 0 && (
-              <div className="drawer-section">
-                <span className="section-label">
-                  <b>参</b> LINK
-                </span>
-                <div className="drawer-links">
-                  {links.map((l, i) => (
-                    <a key={i} href={l.url} target="_blank" rel="noopener noreferrer">
-                      <i className={l.icon || 'fa-solid fa-link'} />
-                      {l.name}
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
-          </section>
-        </div>
+      {/* 아래쪽 도구: 접혀 있을 땐 아이콘만 세로로 */}
+      <div className="hw-sb-tools">
+        <a href="/search" className="hw-sb-tool hw-sb-mini" aria-label="검색" title="검색">
+          <i className="fa-solid fa-magnifying-glass" />
+        </a>
+        {bgm.tracks.length > 0 && (
+          <button type="button" className={`hw-sb-tool hw-sb-mini ${bgm.playing ? 'on' : ''}`} onClick={bgm.toggle} aria-label={bgm.playing ? 'BGM 일시정지' : 'BGM 재생'} title="BGM">
+            <i className={`fa-solid ${bgm.playing ? 'fa-pause' : 'fa-music'}`} />
+          </button>
+        )}
+        {app.theme.allowToggle !== false && (
+          <button type="button" className="hw-sb-tool" onClick={app.toggleMode} aria-label={modeLabel} title={modeLabel}>
+            <i className={`fa-solid ${app.mode === 'dark' ? 'fa-sun' : 'fa-moon'}`} />
+          </button>
+        )}
+        {app.admin ? (
+          <>
+            <a href="/write" className="hw-sb-tool accent" aria-label="글쓰기" title="글쓰기">
+              <i className="fa-solid fa-pen" />
+            </a>
+            <a href="/admin" className="hw-sb-tool" aria-label="관리" title="관리">
+              <i className="fa-solid fa-gear" />
+            </a>
+            <button type="button" className="hw-sb-tool" onClick={logout} aria-label="로그아웃" title="로그아웃">
+              <i className="fa-solid fa-right-from-bracket" />
+            </button>
+          </>
+        ) : (
+          <a href="/login" className="hw-sb-tool" aria-label="로그인" title="로그인">
+            <i className="fa-solid fa-key" />
+          </a>
+        )}
       </div>
     </aside>
   )
 }
 
-export function bottomNavItems(app) {
-  const list = Array.isArray(app.theme.bottomNav) ? app.theme.bottomNav : app.site.bottomNav || []
-  return list.filter((it) => it && it.href && (!it.adminOnly || app.admin)).slice(0, 6)
-}
-
-/* 휴대폰 하단 탭: 화투패 모양 탭이 한 줄로 놓이고, 지금 페이지 패가 붉게 솟아요. (PC에서는 상단바 메뉴로 보여요) */
+/* 휴대폰 하단 탭 (관리 › 디자인 › 배치 › 휴대폰 메뉴에서 켜요). PC에서는 숨겨요. */
 function BottomNav({ path }) {
   const app = useApp()
   const items = bottomNavItems(app)
@@ -474,11 +413,8 @@ function BottomNav({ path }) {
       {items.map((item, i) => {
         const active = item.href === '/' ? path === '/' : path.startsWith(item.href)
         return (
-          <a key={i} href={item.href} className={active ? 'active' : ''} style={{ '--i': i }}>
-            <span className="hw-tab-card">
-              <i className={item.icon || 'fa-solid fa-circle'} />
-              <em aria-hidden="true">{monthAt(i).kanji}</em>
-            </span>
+          <a key={i} href={item.href} className={active ? 'active' : ''}>
+            <i className={item.icon || 'fa-solid fa-circle'} />
             <span>{item.label}</span>
           </a>
         )
@@ -514,50 +450,40 @@ function Footer() {
             </span>
           </div>
           <b>{pad2(m.n)}</b>
-          <HwCard month={m} size="s" label="이달의 패" />
+          <HwCard month={m} size="s" />
         </div>
       </div>
     </footer>
   )
 }
 
-/* ---------------- 배경 장식 ---------------- */
+/* ---------------- 배경 장식 (단색) ---------------- */
 
-function Backdrop({ route, petals }) {
+function Backdrop({ route }) {
   const { site } = useApp()
-  const kanji = routeKanji(route)
-  const m = currentMonth()
+  const word = routeWord(route)
   return (
     <div className="hw-backdrop" aria-hidden="true">
-      <div className="hw-sun" />
-      <div className="hw-splash" />
-      <div className="hw-waves" />
-      <div className="hw-kanji" key={kanji}>
-        {kanji}
-      </div>
-      <div className="hw-grain" />
-      <div className="hw-side hw-side-l">
-        <span>{site.title}</span>
+      <div className="hw-band" />
+      <div className="hw-band-line" />
+      <div className="hw-dots" />
+      <div className="hw-orbit">
         <i />
-        <span>
-          {kanjiNumber(m.n)}月 · {m.kanji}
+      </div>
+      <div className="hw-word" key={word}>
+        {word}
+      </div>
+      <div className="hw-edge">
+        <span>{site.title}</span>
+        <span className="hw-progress-track">
+          <span className="hw-progress" />
         </span>
       </div>
-      <div className="hw-side hw-side-r">
-        <span className="hw-progress" />
-      </div>
-      {petals && (
-        <div className="hw-petals">
-          {Array.from({ length: 12 }, (_, i) => (
-            <span key={i} style={{ '--i': i, '--x': `${(i * 37) % 100}vw`, '--d': `${11 + ((i * 7) % 9)}s`, '--delay': `${-((i * 13) % 17)}s`, '--s': 0.6 + ((i * 3) % 5) / 10 }} />
-          ))}
-        </div>
-      )}
     </div>
   )
 }
 
-// 페이지가 바뀔 때 붉은 막과 먹색 막이 사선으로 스쳐 지나가요. (처음 들어올 때는 도장이 찍히며 막이 걷혀요)
+// 페이지가 바뀔 때 다홍 막이 사선으로 한 번 스쳐 지나가요.
 function RouteWipe({ path }) {
   const first = useRef(true)
   const [n, setN] = useState(0)
@@ -568,58 +494,9 @@ function RouteWipe({ path }) {
     }
     if (!reduceMotion()) setN((x) => x + 1)
   }, [path])
-  if (n === 0) return <div className="hw-intro" aria-hidden="true" />
+  if (n === 0) return null
   return (
     <div className="hw-wipe" key={n} aria-hidden="true">
-      <i />
-      <i />
-    </div>
-  )
-}
-
-// 먹 번짐 커서: 마우스를 따라 동그란 고리가 따라오고, 누를 수 있는 곳 위에서는 커져요. (마우스가 있는 기기에서만)
-function InkCursor() {
-  const ref = useRef(null)
-  useEffect(() => {
-    if (!window.matchMedia?.('(pointer: fine)').matches || reduceMotion()) return
-    const el = ref.current
-    if (!el) return
-    let x = -100
-    let y = -100
-    let cx = x
-    let cy = y
-    let raf = 0
-    const tick = () => {
-      cx += (x - cx) * 0.2
-      cy += (y - cy) * 0.2
-      el.style.transform = `translate3d(${cx}px, ${cy}px, 0)`
-      raf = Math.abs(x - cx) + Math.abs(y - cy) > 0.3 ? requestAnimationFrame(tick) : 0
-    }
-    const onMove = (e) => {
-      x = e.clientX
-      y = e.clientY
-      el.classList.add('on')
-      const hit = e.target.closest?.('a, button, [role="button"], summary, label, select, input[type="checkbox"]')
-      el.classList.toggle('hover', !!hit)
-      if (!raf) raf = requestAnimationFrame(tick)
-    }
-    const onDown = () => el.classList.add('down')
-    const onUp = () => el.classList.remove('down')
-    const onLeave = () => el.classList.remove('on')
-    window.addEventListener('pointermove', onMove, { passive: true })
-    window.addEventListener('pointerdown', onDown)
-    window.addEventListener('pointerup', onUp)
-    document.documentElement.addEventListener('mouseleave', onLeave)
-    return () => {
-      cancelAnimationFrame(raf)
-      window.removeEventListener('pointermove', onMove)
-      window.removeEventListener('pointerdown', onDown)
-      window.removeEventListener('pointerup', onUp)
-      document.documentElement.removeEventListener('mouseleave', onLeave)
-    }
-  }, [])
-  return (
-    <div className="hw-cursor" ref={ref} aria-hidden="true">
       <i />
     </div>
   )
